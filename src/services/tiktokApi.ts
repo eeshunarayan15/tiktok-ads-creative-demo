@@ -1,6 +1,6 @@
 // src/services/tiktokApi.ts
 
-import {
+import type{
   ApiError,
   MusicValidationResponse,
   AdCreationResponse,

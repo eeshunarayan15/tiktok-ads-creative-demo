@@ -1,15 +1,14 @@
 // src/contexts/AuthContext.tsx
-import React, {
+import  {
   createContext,
   useContext,
   useState,
   useEffect,
   type ReactNode, // Add 'type' keyword
 } from "react";
-import type { TikTokAuthState, OAuthTokens, TikTokUser } from "../types/tiktok";
+import type { TikTokAuthState } from "../types/tiktok";
 import {
   getStoredTokens,
-  storeTokens,
   clearTokens,
   isTokenValid,
   initiateOAuthFlow,
