@@ -4,7 +4,8 @@ export const OAUTH_CONFIG = {
   authUrl: "https://ads.tiktok.com/marketing_api/auth",
   tokenUrl: "https://business-api.tiktok.com/open_api/v1.3/oauth2/access_token",
   scopes: ["user.info.basic", "video.list", "ad_management"],
-  redirectUri: import.meta.env.VITE_REDIRECT_URI || "http://localhost:5173/auth/callback",
+  redirectUri:
+    import.meta.env.VITE_REDIRECT_URI || "http://localhost:5173/auth/callback",
 };
 
 // API
@@ -26,33 +27,72 @@ export const CTA_OPTIONS = [
 ];
 
 export const OBJECTIVE_OPTIONS = [
-  { value: "TRAFFIC", label: "Traffic", description: "Drive traffic to your website" },
-  { value: "CONVERSIONS", label: "Conversions", description: "Get more sales or sign-ups" },
+  {
+    value: "TRAFFIC",
+    label: "Traffic",
+    description: "Drive traffic to your website",
+  },
+  {
+    value: "CONVERSIONS",
+    label: "Conversions",
+    description: "Get more sales or sign-ups",
+  },
 ];
 
 export const MUSIC_OPTIONS = [
-  { value: "existing", label: "Use Existing Music ID", description: "Enter a music ID from TikTok's library" },
-  { value: "upload", label: "Upload Custom Music", description: "Upload your own audio file" },
-  { value: "none", label: "No Music", description: "Create ad without background music" },
+  {
+    value: "existing",
+    label: "Use Existing Music ID",
+    description: "Enter a music ID from TikTok's library",
+  },
+  {
+    value: "upload",
+    label: "Upload Custom Music",
+    description: "Upload your own audio file",
+  },
+  {
+    value: "none",
+    label: "No Music",
+    description: "Create ad without background music",
+  },
 ];
 
 // Validation
 export const VALIDATION_RULES = {
   campaignName: { minLength: 3, maxLength: 100 },
   adText: { maxLength: 100 },
+  musicId: { pattern: /^[0-9]{10,20}$/ },
 };
 
 export const VALIDATION_ERRORS = {
   campaignName: {
     required: "Campaign name is required",
     minLength: "Campaign name must be at least 3 characters",
+    maxLength: "Campaign name must not exceed 100 characters", // ✅ ADD THIS
   },
-  objective: { required: "Please select a campaign objective" },
-  adText: { required: "Ad text is required", maxLength: "Max 100 characters" },
-  cta: { required: "Please select a call-to-action" },
-  musicOption: { required: "Please select a music option", invalidForObjective: "Music required for Conversions" },
-  musicId: { required: "Music ID is required" },
-  uploadedMusicFile: { required: "Please upload a music file" },
+  objective: {
+    required: "Please select a campaign objective",
+  },
+  adText: {
+    required: "Ad text is required",
+    maxLength: "Ad text must not exceed 100 characters",
+  },
+  cta: {
+    required: "Please select a call-to-action",
+  },
+  musicOption: {
+    required: "Please select a music option",
+    invalidForObjective: "Music is required for Conversions campaigns",
+  },
+  musicId: {
+    required: "Music ID is required",
+    invalid: "Music ID must be a 10-20 digit number", // ✅ ADD THIS
+  },
+  uploadedMusicFile: {
+    required: "Please upload a music file",
+    invalidType: "Please upload a valid audio file (MP3, WAV, or M4A)", // ✅ ADD THIS
+    tooLarge: "File size must not exceed 10MB", // ✅ ADD THIS
+  },
 };
 
 // Error Codes

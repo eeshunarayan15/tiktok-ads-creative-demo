@@ -1,6 +1,6 @@
 // src/services/tiktokApi.ts
 
-import type{
+import type {
   ApiError,
   MusicValidationResponse,
   AdCreationResponse,
@@ -176,7 +176,7 @@ export async function getAdvertiserInfo(
  */
 export async function uploadMusic(
   file: File,
-  accessToken: string,
+  _accessToken: string, // ✅ FIXED: Prefixed with underscore (unused in mock mode)
 ): Promise<string> {
   // Simulate upload delay
   await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -192,12 +192,16 @@ export async function uploadMusic(
 // Mock API implementations for development
 // ============================================================================
 
-function mockValidateMusicId(musicId: string): MusicValidationResponse {
+function mockValidateMusicId(
+  musicId: string,
+): Promise<MusicValidationResponse> {
+  // ✅ FIXED: Added Promise<>
   // Simulate API delay
   return new Promise((resolve) => {
     setTimeout(() => {
       // Valid music IDs
-      if (MOCK_MUSIC_IDS.includes(musicId as any)) {
+      if (MOCK_MUSIC_IDS.includes(musicId)) {
+        // ✅ FIXED: Removed 'as any'
         resolve({
           valid: true,
           music_id: musicId,

@@ -120,8 +120,8 @@ export function AdCreationForm() {
       {systemError && (
         <div className="mb-6">
           <ErrorBanner
-            message={systemError.message}
-            onClose={() => setSystemError(null)}
+            error={systemError}
+            onDismiss={() => setSystemError(null)}
           />
         </div>
       )}
