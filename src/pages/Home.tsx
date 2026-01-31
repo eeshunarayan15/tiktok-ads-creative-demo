@@ -1,6 +1,6 @@
 // src/pages/Home.tsx
 
-
+import { getOAuthFriendlyError } from "../utils/errorMessages";
 import { useSearchParams } from "react-router-dom";
 import { OAuthButton } from "../components/OAuthButton";
 import { AdCreationForm } from "../components/AdCreationForm";
@@ -18,17 +18,14 @@ export function Home() {
   useEffect(() => {
     const error = searchParams.get("error");
     if (error) {
-      setOauthError({
-        type: "OAUTH_INVALID_CREDENTIALS",
-        title: "Authentication Failed",
-        message: decodeURIComponent(error),
-        canRetry: true,
-      });
-      // Clear error from URL
+      // 🎯 Convert error code to friendly message
+      const friendlyError = getOAuthFriendlyError(error);
+      setOauthError(friendlyError);
+
+      // Clear the error from URL
       setSearchParams({});
     }
-  }, [searchParams]);
-
+  }, [searchParams, setSearchParams]);
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50">

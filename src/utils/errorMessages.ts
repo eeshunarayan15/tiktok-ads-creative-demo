@@ -193,3 +193,65 @@ export const VALIDATION_ERRORS = {
     tooLarge: "File size must not exceed 10MB",
   },
 } as const;
+/**
+ * 🎯 Converts OAuth callback error codes to user-friendly messages
+ * This is specifically for errors that happen during the OAuth redirect flow
+ * 
+ * @param errorCode - The error code from URL parameters (e.g., "access_denied", "missing_code")
+ * @returns A user-friendly error object that can be displayed to users
+ */
+export function getOAuthFriendlyError(errorCode: string): UserFriendlyError {
+  
+  // User clicked "Cancel" or "Deny" on TikTok's authorization page
+  if (errorCode === "access_denied") {
+    return {
+      type: "OAUTH_INVALID_CREDENTIALS",
+      title: "Connection Cancelled",
+      message: "You cancelled the TikTok connection. That's okay! Click 'Connect TikTok Ads Account' to try again.",
+      action: "Click the Connect button above to retry",
+      canRetry: true,
+    };
+  }
+
+  // Authorization code is missing from the callback URL
+  if (errorCode === "missing_code") {
+    return {
+      type: "OAUTH_INVALID_CREDENTIALS",
+      title: "Connection Failed",
+      message: "We couldn't receive authorization from TikTok. This might be a temporary issue.",
+      action: "Please try connecting again",
+      canRetry: true,
+    };
+  }
+
+  // State parameter doesn't match (CSRF protection failed)
+  if (errorCode === "invalid_state") {
+    return {
+      type: "OAUTH_INVALID_CREDENTIALS",
+      title: "Security Check Failed",
+      message: "The connection was interrupted for security reasons. Please start fresh.",
+      action: "Click Connect TikTok Ads Account to try again",
+      canRetry: true,
+    };
+  }
+
+  // Generic OAuth failure
+  if (errorCode === "oauth_failed") {
+    return {
+      type: "OAUTH_INVALID_CREDENTIALS",
+      title: "Connection Error",
+      message: "Something went wrong while connecting to TikTok. Please try again.",
+      action: "Click Connect TikTok Ads Account",
+      canRetry: true,
+    };
+  }
+
+  // Fallback for any unknown error code
+  return {
+    type: "UNKNOWN_ERROR",
+    title: "Unexpected Error",
+    message: "An unexpected error occurred during connection. Please try again.",
+    action: "Click Connect TikTok Ads Account",
+    canRetry: true,
+  };
+}

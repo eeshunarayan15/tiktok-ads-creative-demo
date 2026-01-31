@@ -6,44 +6,54 @@ import { useAuth } from "../contexts/AuthContext";
 
 export function OAuthCallback() {
   const navigate = useNavigate();
-  const { handleCallback, error } = useAuth();
+  const { handleCallback } = useAuth();
 
   useEffect(() => {
     const processCallback = async () => {
-      // Get code and state from URL params
+      // 📌 STEP 1: Get the data from URL
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
       const state = params.get("state");
       const errorParam = params.get("error");
-      const errorDescription = params.get("error_description");
 
-      // Handle OAuth errors
+      // 📌 STEP 2: Check if user cancelled on TikTok page
+      if (errorParam === "access_denied") {
+        navigate("/?error=access_denied");
+        return;
+      }
+
+      // 📌 STEP 3: Check if there's any other error
       if (errorParam) {
-        console.error("OAuth error:", errorParam, errorDescription);
-        navigate(
-          "/?error=" + encodeURIComponent(errorDescription || errorParam),
-        );
+        navigate("/?error=oauth_failed");
         return;
       }
 
-      // Validate required params
-      if (!code || !state) {
-        navigate("/?error=" + encodeURIComponent("Missing authorization code"));
+      // 📌 STEP 4: Check if code is missing
+      if (!code) {
+        navigate("/?error=missing_code");
         return;
       }
 
+      // 📌 STEP 5: Check if state is missing
+      if (!state) {
+        navigate("/?error=invalid_state");
+        return;
+      }
+
+      // 📌 STEP 6: Everything is okay, try to connect
       try {
         await handleCallback(code, state);
-        navigate("/");
+        navigate("/"); // Success! Go to home page
       } catch (error) {
         console.error("Callback error:", error);
-        navigate("/?error=" + encodeURIComponent("Authentication failed"));
+        navigate("/?error=oauth_failed");
       }
     };
 
     processCallback();
   }, [handleCallback, navigate]);
 
+  // 🎨 Loading screen while processing
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
       <div className="text-center">
@@ -52,20 +62,8 @@ export function OAuthCallback() {
           Connecting to TikTok...
         </h2>
         <p className="text-sm text-gray-600">
-          Please wait while we complete the authentication
+          Please wait while we complete the connection
         </p>
-
-        {error && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg max-w-md mx-auto">
-            <p className="text-sm text-red-600">{error}</p>
-            <button
-              onClick={() => navigate("/")}
-              className="mt-3 px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50"
-            >
-              Return Home
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
