@@ -1,10 +1,10 @@
 // src/contexts/AuthContext.tsx
-import  {
+import {
   createContext,
   useContext,
   useState,
   useEffect,
-  type ReactNode, // Add 'type' keyword
+  type ReactNode,
 } from "react";
 import type { TikTokAuthState } from "../types/tiktok";
 import {
@@ -25,23 +25,27 @@ interface AuthContextType extends TikTokAuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// 🔧 Get API mode from environment
+const API_MODE = import.meta.env.VITE_API_MODE || "real";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<TikTokAuthState>({
     isAuthenticated: false,
-    accessToken: null, // Changed from 'tokens' to match your type
+    accessToken: null,
     advertiserId: null,
-    user: null, // Need to add to TikTokAuthState type
-    loading: true, // Need to add to TikTokAuthState type
-    error: null, // Need to add to TikTokAuthState type
+    user: null,
+    loading: true,
+    error: null,
   });
 
   useEffect(() => {
     const initAuth = async () => {
+      // 🎯 STEP 1: Check if we have stored tokens first
       const tokens = getStoredTokens();
 
       if (tokens && isTokenValid(tokens)) {
         try {
-          const user = await getAdvertiserInfo(tokens.accessToken); // Use accessToken not access_token
+          const user = await getAdvertiserInfo(tokens.accessToken);
 
           setState({
             isAuthenticated: true,
@@ -51,27 +55,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             loading: false,
             error: null,
           });
+          return; // ✅ Exit early if real auth exists
         } catch (error) {
           clearTokens();
+          // Continue to mock mode check below
+        }
+      }
+
+      // 🎯 STEP 2: If no valid tokens AND we're in mock mode, auto-authenticate
+      if (API_MODE === "mock") {
+        console.log("🧪 Mock mode detected - auto-authenticating...");
+
+        // Create fake tokens for mock mode
+        const mockTokens = {
+          accessToken: "mock_token_for_testing_12345",
+          expires_in: 7200,
+          timestamp: Date.now(),
+        };
+
+        try {
+          // Get mock user info
+          const user = await getAdvertiserInfo(mockTokens.accessToken);
+
           setState({
-            isAuthenticated: false,
-            accessToken: null,
-            advertiserId: null,
-            user: null,
+            isAuthenticated: true,
+            accessToken: mockTokens.accessToken,
+            advertiserId: user.advertiser_id,
+            user,
             loading: false,
             error: null,
           });
+          return; // ✅ Exit early after mock auth
+        } catch (error) {
+          console.error("Mock auth failed:", error);
+          // Continue to unauthenticated state below
         }
-      } else {
-        setState({
-          isAuthenticated: false,
-          accessToken: null,
-          advertiserId: null,
-          user: null,
-          loading: false,
-          error: null,
-        });
       }
+
+      // 🎯 STEP 3: If neither real tokens nor mock mode, show unauthenticated state
+      setState({
+        isAuthenticated: false,
+        accessToken: null,
+        advertiserId: null,
+        user: null,
+        loading: false,
+        error: null,
+      });
     };
 
     initAuth();
